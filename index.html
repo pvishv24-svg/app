@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPortal | Complete Learning Platform</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- CSS VARIABLES --- */
+        :root {
+            --primary: #4f46e5;
+            --secondary: #10b981;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Poppins', sans-serif; line-height: 1.6; }
+        a { text-decoration: none; color: inherit; }
+        
+        /* --- HEADER --- */
+        header {
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+        header h1 { font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 1rem; }
+        header p { font-size: 1.1rem; opacity: 0.9; }
+
+        /* --- CONTAINER --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
+
+        /* --- SUBJECT SECTION --- */
+        .subject-section { margin-bottom: 4rem; }
+        .subject-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        .subject-title { font-size: 2rem; color: var(--primary); font-weight: 600; }
+        .toggle-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .toggle-btn:hover { background: #4338ca; }
+
+        /* --- PARTS GRID --- */
+        .parts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            display: none; /* Hidden by default */
+        }
+        .parts-grid.active { display: grid; }
+
+        /* --- PART CARD --- */
+        .part-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+        .part-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+        .part-number {
+            background: var(--secondary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        .part-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .part-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .close-btn:hover { color: var(--primary); }
+        .modal-title { font-size: 2rem; color: var(--primary); margin-bottom: 1rem; font-family: 'Playfair Display', serif; }
+        .modal-body { color: var(--text-muted); line-height: 1.8; }
+        .modal-meta { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.9rem; color: var(--text-muted); }
+
+        /* --- HIDDEN DETAILS (HTML Embedded) --- */
+        .hidden-details { display: none; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            .subject-header { flex-direction: column; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <h1>EduPortal</h1>
+        <p>Master Your Subjects with Structured Learning</p>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div class="container">
+
+        <!-- SUBJECT 1: Mathematics -->
+        <div class="subject-section">
+            <div class="subject-header">
+                <h2 class="subject-title">Mathematics</h2>
+                <button class="toggle-btn" onclick="toggleSubject('math-parts')">Show Parts</button>
+            </div>
+            <div class="parts-grid" id="math-parts">
+                <div class="part-card" onclick="openModal('math1')">
+                    <span class="part-number">Part 1</span>
+                    <h3 class="part-title">Algebra Basics</h3>
+                    <p class="part-desc">Introduction to variables, equations, and functions.</p>
+                </div>
+                <div class="part-card" onclick="openModal('math2')">
+                    <span class="part-number">Part 2</span>
+                    <h3 class="part-title">Calculus</h3>
+                    <p class="part-desc">Limits, derivatives, and integrals explained.</p>
+                </div>
+                <div class="part-card" onclick="openModal('math3')">
+                    <span class="part-number">Part 3</span>
+                    <h3 class="part-title">Geometry</h3>
+                    <p class="part-desc">Shapes, angles, and spatial relationships.</p>
+                </div>
+                <div class="part-card" onclick="openModal('math4')">
+                    <span class="part-number">Part 4</span>
+                    <h3 class="part-title">Trigonometry</h3>
+                    <p class="part-desc">Trigonometric functions and identities.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUBJECT 2: Physics -->
+        <div class="subject-section">
+            <div class="subject-header">
+                <h2 class="subject-title">Physics</h2>
+                <button class="toggle-btn" onclick="toggleSubject('physics-parts')">Show Parts</button>
+            </div>
+            <div class="parts-grid" id="physics-parts">
+                <div class="part-card" onclick="openModal('phys1')">
+                    <span class="part-number">Part 1</span>
+                    <h3 class="part-title">Mechanics</h3>
+                    <p class="part-desc">Motion, forces, and energy principles.</p>
+                </div>
+                <div class="part-card" onclick="openModal('phys2')">
+                    <span class="part-number">Part 2</span>
+                    <h3 class="part-title">Thermodynamics</h3>
+                    <p class="part-desc">Heat, temperature, and energy transfer.</p>
+                </div>
+                <div class="part-card" onclick="openModal('phys3')">
+                    <span class="part-number">Part 3</span>
+                    <h3 class="part-title">Electromagnetism</h3>
+                    <p class="part-desc">Electric fields, magnetic fields, and circuits.</p>
+                </div>
+                <div class="part-card" onclick="openModal('phys4')">
+                    <span class="part-number">Part 4</span>
+                    <h3 class="part-title">Optics</h3>
+                    <p class="part-desc">Light, reflection, and refraction.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUBJECT 3: Chemistry -->
+        <div class="subject-section">
+            <div class="subject-header">
+                <h2 class="subject-title">Chemistry</h2>
+                <button class="toggle-btn" onclick="toggleSubject('chem-parts')">Show Parts</button>
+            </div>
+            <div class="parts-grid" id="chem-parts">
+                <div class="part-card" onclick="openModal('chem1')">
+                    <span class="part-number">Part 1</span>
+                    <h3 class="part-title">Atomic Structure</h3>
+                    <p class="part-desc">Atoms, electrons, and protons explained.</p>
+                </div>
+                <div class="part-card" onclick="openModal('chem2')">
+                    <span class="part-number">Part 2</span>
+                    <h3 class="part-title">Chemical Bonding</h3>
+                    <p class="part-desc">Ionic, covalent, and metallic bonds.</p>
+                </div>
+                <div class="part-card" onclick="openModal('chem3')">
+                    <span class="part-number">Part 3</span>
+                    <h3 class="part-title">Organic Chemistry</h3>
+                    <p class="part-desc">Carbon compounds and reactions.</p>
+                </div>
+                <div class="part-card" onclick="openModal('chem4')">
+                    <span class="part-number">Part 4</span>
+                    <h3 class="part-title">Periodic Table</h3>
+                    <p class="part-desc">Elements and their properties.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUBJECT 4: Biology -->
+        <div class="subject-section">
+            <div class="subject-header">
+                <h2 class="subject-title">Biology</h2>
+                <button class="toggle-btn" onclick="toggleSubject('bio-parts')">Show Parts</button>
+            </div>
+            <div class="parts-grid" id="bio-parts">
+                <div class="part-card" onclick="openModal('bio1')">
+                    <span class="part-number">Part 1</span>
+                    <h3 class="part-title">Cell Biology</h3>
+                    <p class="part-desc">Structure and function of cells.</p>
+                </div>
+                <div class="part-card" onclick="openModal('bio2')">
+                    <span class="part-number">Part 2</span>
+                    <h3 class="part-title">Genetics</h3>
+                    <p class="part-desc">DNA, RNA, and heredity.</p>
+                </div>
+                <div class="part-card" onclick="openModal('bio3')">
+                    <span class="part-number">Part 3</span>
+                    <h3 class="part-title">Ecology</h3>
+                    <p class="part-desc">Ecosystems and environmental relationships.</p>
+                </div>
+                <div class="part-card" onclick="openModal('bio4')">
+                    <span class="part-number">Part 4</span>
+                    <h3 class="part-title">Human Anatomy</h3>
+                    <p class="part-desc">Body systems and organs.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUBJECT 5: Computer Science -->
+        <div class="subject-section">
+            <div class="subject-header">
+                <h2 class="subject-title">Computer Science</h2>
+                <button class="toggle-btn" onclick="toggleSubject('cs-parts')">Show Parts</button>
+            </div>
+            <div class="parts-grid" id="cs-parts">
+                <div class="part-card" onclick="openModal('cs1')">
+                    <span class="part-number">Part 1</span>
+                    <h3 class="part-title">Programming Basics</h3>
+                    <p class="part-desc">Variables, loops, and functions in Python.</p>
+                </div>
+                <div class="part-card" onclick="openModal('cs2')">
+                    <span class="part-number">Part 2</span>
+                    <h3 class="part-title">Data Structures</h3>
+                    <p class="part-desc">Arrays, linked lists, trees, and graphs.</p>
+                </div>
+                <div class="part-card" onclick="openModal('cs3')">
+                    <span class="part-number">Part 3</span>
+                    <h3 class="part-title">Algorithms</h3>
+                    <p class="part-desc">Sorting, searching, and complexity analysis.</p>
+                </div>
+                <div class="part-card" onclick="openModal('cs4')">
+                    <span class="part-number">Part 4</span>
+                    <h3 class="part-title">Web Development</h3>
+                    <p class="part-desc">HTML, CSS, and JavaScript basics.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL POPUP -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 class="modal-title" id="modalTitle">Title</h2>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be inserted here -->
+            </div>
+            <div class="modal-meta">
+                <span id="modalSubject">Subject</span> | <span id="modalPart">Part</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- HIDDEN DETAILS (HTML Embedded) -->
+    <div class="hidden-details">
+        <!-- Mathematics -->
+        <div id="detail-math1" data-subject="Mathematics" data-part="Part 1">
+            <h3>Algebra Basics</h3>
+            <p>Algebra is the branch of mathematics concerning the study of the rules of operations and relations. <br><br><strong>Key Topics:</strong><br>• Variables and Constants<br>• Linear Equations<br>• Quadratic Equations<br>• Functions and Graphs</p>
+        </div>
+        <div id="detail-math2" data-subject="Mathematics" data-part="Part 2">
+            <h3>Calculus</h3>
+            <p>Calculus is the mathematical study of continuous change. <br><br><strong>Key Topics:</strong><br>• Limits and Continuity<br>• Derivatives<br>• Integrals<br>• Fundamental Theorem of Calculus</p>
+        </div>
+        <div id="detail-math3" data-subject="Mathematics" data-part="Part 3">
+            <h3>Geometry</h3>
+            <p>Geometry is a branch of mathematics concerned with questions of shape, size, and position. <br><br><strong>Key Topics:</strong><br>
+                            <h3>Geometry</h3>
+            <p>Geometry is a branch of mathematics concerned with questions of shape, size, and position. <br><br><strong>Key Topics:</strong><br>• Points, Lines, and Planes<br>• Triangles and Polygons<br>• Circles and Spheres<br>• Coordinate Geometry</p>
+        </div>
+        <div id="detail-math4" data-subject="Mathematics" data-part="Part 4">
+            <h3>Trigonometry</h3>
+            <p>Trigonometry is the study of relationships between side lengths and angles of triangles. <br><br><strong>Key Topics:</strong><br>• Sine, Cosine, Tangent<br>• Trigonometric Identities<br>• Unit Circle<br>• Applications in Physics</p>
+        </div>
+        
+        <!-- Physics -->
+        <div id="detail-phys1" data-subject="Physics" data-part="Part 1">
+            <h3>Mechanics</h3>
+            <p>Classical mechanics is one of the two major sub-fields of mechanics. <br><br><strong>Key Topics:</strong><br>• Newton's Laws of Motion<br>• Kinematics<br>• Work and Energy<br>• Momentum</p>
+        </div>
+        <div id="detail-phys2" data-subject="Physics" data-part="Part 2">
+            <h3>Thermodynamics</h3>
+            <p>Thermodynamics is a branch of physics that deals with heat, work, and temperature. <br><br><strong>Key Topics:</strong><br>• Laws of Thermodynamics<br>• Heat Transfer<br>• Entropy<br>• Heat Engines</p>
+        </div>
+        <div id="detail-phys3" data-subject="Physics" data-part="Part 3">
+            <h3>Electromagnetism</h3>
+            <p>Electromagnetism is a branch of physics involving the study of the electromagnetic force. <br><br><strong>Key Topics:</strong><br>• Electric Fields<br>• Magnetic Fields<br>• Maxwell's Equations<br>• Electromagnetic Waves</p>
+        </div>
+        <div id="detail-phys4" data-subject="Physics" data-part="Part 4">
+            <h3>Optics</h3>
+            <p>Optics is the branch of physics that studies the behavior and properties of light. <br><br><strong>Key Topics:</strong><br>• Reflection and Refraction<br>• Lenses and Mirrors<br>• Optical Instruments<br>• Wave-Particle Duality</p>
+        </div>
+        
+        <!-- Chemistry -->
+        <div id="detail-chem1" data-subject="Chemistry" data-part="Part 1">
+            <h3>Atomic Structure</h3>
+            <p>Atomic structure describes the structure of an atom which comprises of electrons, protons, and neutrons. <br><br><strong>Key Topics:</strong><br>• Atomic Number and Mass<br>• Electron Configuration<br>• Isotopes<br>• Quantum Numbers</p>
+        </div>
+        <div id="detail-chem2" data-subject="Chemistry" data-part="Part 2">
+            <h3>Chemical Bonding</h3>
+            <p>Chemical bonding is the process by which atoms combine to form compounds. <br><br><strong>Key Topics:</strong><br>• Ionic Bonds<br>• Covalent Bonds<br>• Metallic Bonds<br>• Molecular Geometry</p>
+        </div>
+        <div id="detail-chem3" data-subject="Chemistry" data-part="Part 3">
+            <h3>Organic Chemistry</h3>
+            <p>Organic chemistry is the study of carbon-containing compounds. <br><br><strong>Key Topics:</strong><br>• Hydrocarbons<br>• Functional Groups<br>• Organic Reactions<br>• Polymers</p>
+        </div>
+        <div id="detail-chem4" data-subject="Chemistry" data-part="Part 4">
+            <h3>Periodic Table</h3>
+            <p>The periodic table is a tabular arrangement of chemical elements. <br><br><strong>Key Topics:</strong><br>• Groups and Periods<br>• Atomic Radius<br>• Electronegativity<br>• Ionization Energy</p>
+        </div>
+        
+        <!-- Biology -->
+        <div id="detail-bio1" data-subject="Biology" data-part="Part 1">
+            <h3>Cell Biology</h3>
+            <p>Cell biology is the study of cell structure and function. <br><br><strong>Key Topics:</strong><br>• Cell Membrane<br>• Nucleus and Organelles<br>• Cell Division<br>• Cell Cycle</p>
+        </div>
+        <div id="detail-bio2" data-subject="Biology" data-part="Part 2">
+            <h3>Genetics</h3>
+            <p>Genetics is the study of genes, genetic variation, and heredity. <br><br><strong>Key Topics:</strong><br>• DNA and RNA<br>• Mendelian Genetics<br>• Gene Expression<br>• Mutations</p>
+        </div>
+        <div id="detail-bio3" data-subject="Biology" data-part="Part 3">
+            <h3>Ecology</h3>
+            <p>Ecology is the study of interactions among organisms and their environment. <br><br><strong>Key Topics:</strong><br>• Ecosystems<br>• Food Chains<br>• Biodiversity<br>• Conservation</p>
+        </div>
+        <div id="detail-bio4" data-subject="Biology" data-part="Part 4">
+            <h3>Human Anatomy</h3>
+            <p>Human anatomy is the study of the structure of the human body. <br><br><strong>Key Topics:</strong><br>• Skeletal System<br>• Muscular System<br>• Nervous System<br>• Circulatory System</p>
+        </div>
+        
+        <!-- Computer Science -->
+        <div id="detail-cs1" data-subject="Computer Science" data-part="Part 1">
+            <h3>Programming Basics</h3>
+            <p>Programming is the process of creating a set of instructions that tell a computer how to perform a task. <br><br><strong>Key Topics:</strong><br>• Variables and Data Types<br>• Control Structures<br>• Functions<br>• Input/Output</p>
+        </div>
+        <div id="detail-cs2" data-subject="Computer Science" data-part="Part 2">
+            <h3>Data Structures</h3>
+            <p>A data structure is a particular way of organizing data in a computer. <br><br><strong>Key Topics:</strong><br>• Arrays and Lists<br>• Stacks and Queues<br>• Trees and Graphs<br>• Hash Tables</p>
+        </div>
+        <div id="detail-cs3" data-subject="Computer Science" data-part="Part 3">
+            <h3>Algorithms</h3>
+            <p>An algorithm is a finite sequence of well-defined instructions. <br><br><strong>Key Topics:</strong><br>• Sorting Algorithms<br>• Searching Algorithms<br>• Time Complexity<br>• Space Complexity</p>
+        </div>
+        <div id="detail-cs4" data-subject="Computer Science" data-part="Part 4">
+            <h3>Web Development</h3>
+            <p>Web development is the work involved in developing a website. <br><br><strong>Key Topics:</strong><br>• HTML and CSS<br>• JavaScript<br>• Responsive Design<br>• Web Frameworks</p>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // --- OPEN MODAL FUNCTION ---
+        function openModal(id) {
+            const detailDiv = document.getElementById('detail-' + id);
+            if (detailDiv) {
+                const subject = detailDiv.getAttribute('data-subject');
+                const part = detailDiv.getAttribute('data-part');
+                const title = detailDiv.querySelector('h3').innerText;
+                const content = detailDiv.querySelector('p').innerHTML;
+                
+                document.getElementById('modalSubject').innerText = subject;
+                document.getElementById('modalPart').innerText = part;
+                document.getElementById('modalTitle').innerText = title;
+                document.getElementById('modalBody').innerHTML = content;
+                
+                const modal = document.getElementById('infoModal');
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // --- CLOSE MODAL FUNCTION ---
+        function closeModal() {
+            const modal = document.getElementById('infoModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside content
+        window.onclick = function(event) {
+            const modal = document.getElementById('infoModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // --- TOGGLE SUBJECT FUNCTION ---
+        function toggleSubject(id) {
+            const grid = document.getElementById(id);
+            const btn = event.target;
+            
+            if (grid.classList.contains('active')) {
+                grid.classList.remove('active');
+                btn.innerText = 'Show Parts';
+            } else {
+                grid.classList.add('active');
+                btn.innerText = 'Hide Parts';
+            }
+        }
+    </script>
+</body>
+</html>
